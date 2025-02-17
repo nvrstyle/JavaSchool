@@ -1,4 +1,4 @@
-package sbp.school.kafka.connect;
+package ru.sbp.school.kafka.sample.connect;
 
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;

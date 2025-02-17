@@ -1,4 +1,4 @@
-package sbp.school.kafka.connect;
+package ru.sbp.school.kafka.sample.connect;
 
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
