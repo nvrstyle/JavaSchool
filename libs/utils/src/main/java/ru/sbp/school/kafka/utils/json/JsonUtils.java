@@ -12,6 +12,8 @@ import com.networknt.schema.ValidationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,20 @@ public class JsonUtils {
             log.error("Ошибка сериализации класса {}: {}", object.getClass().getName(),  e.getMessage(), e);
             throw new IllegalStateException(e);
         }
+    }
+
+    public static <T> T unmarshall(byte[] data, Class<T> type) {
+        try {
+            return objectMapper.readValue(data, type);
+        } catch (IOException e) {
+            log.error("Ошибка десериализации класса {}: {}", type.getName(), e.getMessage(), e);
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public static <T> void validate(byte[] data, Class<T> clazz) {
+        String json = new String(data, StandardCharsets.UTF_8);
+        validate(json, clazz);
     }
 
     public static <T> void validate(String json, Class<T> clazz) {
