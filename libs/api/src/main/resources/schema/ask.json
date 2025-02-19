@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "title": "Ask",
+  "description": "some kind of operation",
+  "properties": {
+    "uuid": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "array"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "timestamp",
+    "uuid"
+  ]
+}
