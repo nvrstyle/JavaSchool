@@ -28,6 +28,16 @@ public class KafkaEventConsumerBackpressure<T extends Identifiable> implements E
     }
 
     @Override
+    public void listen() {
+        kafkaConsumer.listen();
+    }
+
+    @Override
+    public void stop() {
+        kafkaConsumer.stop();
+    }
+
+    @Override
     public void run() {
         kafkaConsumer.run();
     }

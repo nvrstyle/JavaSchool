@@ -6,6 +6,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.SerializationException;
+import org.apache.kafka.common.errors.WakeupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.sbp.school.kafka.api.EventConsumer;
@@ -19,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
-public class KafkaEventConsumer<T extends Identifiable> implements Runnable, EventConsumer<T> {
+public class KafkaEventConsumer<T extends Identifiable> implements EventConsumer<T> {
 
     private static final Logger log = LoggerFactory.getLogger(KafkaEventConsumer.class);
     private static final String ERROR_PROCESS_LOG = "Ошибка обаботки kafka события из топика {} партиция {} оффсет {}: {}";
@@ -40,7 +41,7 @@ public class KafkaEventConsumer<T extends Identifiable> implements Runnable, Eve
     }
 
     @Override
-    public void run() {
+    public void listen() {
         try {
             while (true) {
                 ConsumerRecords<String, T> consumerRecords = consumer.poll(Duration.ofMillis(100));
@@ -49,6 +50,8 @@ public class KafkaEventConsumer<T extends Identifiable> implements Runnable, Eve
                     handlers.forEach(handler -> executorService.execute(() -> tryHandle(handler, record.value())));
                 }
             }
+        } catch (WakeupException e) {
+            System.out.println("Shutting down...");
         } catch (Exception e) {
             log.error("В работе Kafka консьюмера произошла ошибка: {}", e.getMessage(), e);
             throw new KafkaConsumerException(e);
@@ -56,6 +59,11 @@ public class KafkaEventConsumer<T extends Identifiable> implements Runnable, Eve
             consumer.commitSync(currentOffsets, null);
             consumer.close();
         }
+    }
+
+    @Override
+    public void run() {
+        listen();
     }
 
     private void processRecord(ConsumerRecord<String, T> record) {
@@ -83,5 +91,14 @@ public class KafkaEventConsumer<T extends Identifiable> implements Runnable, Eve
     @Override
     public void addHandler(EventHandler<T> handler) {
         handlers.add(handler);
+    }
+
+    @Override
+    public void stop() {
+        consumer.wakeup();
+    }
+
+    public Map<TopicPartition, OffsetAndMetadata> getCurrentOffsets() {
+        return currentOffsets;
     }
 }
