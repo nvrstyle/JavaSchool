@@ -47,7 +47,7 @@ public class KafkaEventConsumer<T extends Identifiable> implements EventConsumer
                 ConsumerRecords<String, T> consumerRecords = consumer.poll(Duration.ofMillis(100));
                 for (ConsumerRecord<String, T> record : consumerRecords) {
                     processRecord(record);
-                    handlers.forEach(handler -> executorService.execute(() -> tryHandle(handler, record.value())));
+                    handlers.forEach(handler -> tryHandle(handler, record.value()));
                 }
             }
         } catch (WakeupException e) {

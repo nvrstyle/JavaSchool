@@ -9,6 +9,9 @@
     },
     "timeStamp": {
       "type": "array"
+    },
+    "events": {
+      "type": "array"
     }
   },
   "additionalProperties": false,

@@ -22,10 +22,11 @@ public class EventCommiter {
 
     private final Map<UUID, Identifiable> waitCommitMap = new ConcurrentHashMap<>();
     private final Long commitTimeOut;
+    private final Consumer<Ack> backOffCallBack;
 
-    public EventCommiter(ScheduledExecutorService scheduledService, Long commitTimeOut, Consumer<Ack> backOffCallBack) {
+    public EventCommiter(Long commitTimeOut, Consumer<Ack> backOffCallBack) {
         this.commitTimeOut = commitTimeOut;
-        scheduledService.schedule(() -> commit(backOffCallBack), commitTimeOut, TimeUnit.MILLISECONDS);
+        this.backOffCallBack = backOffCallBack;
     }
 
     public void waitCommit(Identifiable event) {
@@ -33,9 +34,13 @@ public class EventCommiter {
         log.info("Событие uuid = {} добавлено в очередь ожидания подтверждения доставки", event.getUuid());
     }
 
-    private void commit(Consumer<Ack> backOffCallBack) {
+    public void commit(Consumer<Ack> backOffCallBack) {
         Ack acknowledge = Ack.acknowledge(waitCommitMap.values().stream().toList());
         waitCommitMap.clear();
         backOffCallBack.accept(acknowledge);
+    }
+
+    public void scheduleCommit(ScheduledExecutorService scheduledService) {
+        scheduledService.schedule(() -> commit(backOffCallBack), commitTimeOut, TimeUnit.MILLISECONDS);
     }
 }
