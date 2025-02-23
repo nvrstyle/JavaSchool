@@ -31,9 +31,9 @@ public class AckCommiter {
     }
 
     public void commit(Ack ack) {
-        commitMap.put(ack.getUuid(), ack);
-        waitCommitMap.remove(ack.getUuid());
-        log.info("Событие uuid = {} успешно доставлено в {}", ack.getUuid(), ack.getTimeStamp());
+        ack.getEvents().forEach(event -> commitMap.put(event, ack));
+        ack.getEvents().forEach(waitCommitMap::remove);
+        log.info("События uuid = {} успешно доставлено в {}", ack.flatMapEvents(), ack.getTimeStamp());
     }
 
     public void waitCommit(Identifiable event) {
