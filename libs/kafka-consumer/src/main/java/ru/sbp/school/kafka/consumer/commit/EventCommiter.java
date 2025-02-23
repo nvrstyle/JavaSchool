@@ -35,6 +35,7 @@ public class EventCommiter {
 
     private void commit(Consumer<Ack> backOffCallBack) {
         Ack acknowledge = Ack.acknowledge(waitCommitMap.values().stream().toList());
+        waitCommitMap.clear();
         backOffCallBack.accept(acknowledge);
     }
 }
