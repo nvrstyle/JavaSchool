@@ -5,13 +5,12 @@ import org.slf4j.LoggerFactory;
 import ru.sbp.school.kafka.api.Ack;
 import ru.sbp.school.kafka.api.Identifiable;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Сервис подтверждения доставки события
@@ -55,5 +54,9 @@ public class AckCommiter {
         return Optional.ofNullable(commitMap.get(event.getUuid()))
                 .map(ask -> ask.isOverdue(commitTimeOut))
                 .orElse(Boolean.TRUE);
+    }
+
+    public List<Ack> getAcks() {
+        return new ArrayList<>(commitMap.values());
     }
 }

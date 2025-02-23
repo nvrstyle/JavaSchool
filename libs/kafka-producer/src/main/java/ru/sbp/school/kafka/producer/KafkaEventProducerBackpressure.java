@@ -7,6 +7,7 @@ import ru.sbp.school.kafka.api.*;
 import ru.sbp.school.kafka.producer.commit.AckCommiter;
 import ru.sbp.school.kafka.producer.exception.KafkaProducerException;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -24,7 +25,6 @@ public class KafkaEventProducerBackpressure<T extends Partitionable & Identifiab
         this.kafkaProducer = new KafkaEventProducer<>(producer, properties);
         this.ackCommiter = new AckCommiter(Executors.newSingleThreadScheduledExecutor(), commitTimeout, (event) -> send((T) event));
         consumer.addHandler(ackCommiter::commit);
-        executorService.execute(consumer);
     }
 
     @Override
@@ -36,5 +36,9 @@ public class KafkaEventProducerBackpressure<T extends Partitionable & Identifiab
             log.error("Ошибка отправки с гарантией доставки события в кафка: {}", e.getMessage(), e);
             throw new KafkaProducerException(e);
         }
+    }
+
+    public List<Ack> getAcks() {
+        return ackCommiter.getAcks();
     }
 }
